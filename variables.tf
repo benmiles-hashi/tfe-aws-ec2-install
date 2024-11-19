@@ -66,3 +66,16 @@ variable "vault_password" {
 variable "s3_bucket" {
   description = "Unique S3 bucket name to use for TFE"
 }
+
+#Redis variables
+variable "redis_username" {
+  description = "redis username - Currently doesn't work.  tfe uses the default user - use auth_token to set password"
+  default = "tfeuser"
+}
+variable "redis_password" {
+  description = "redis auth password"
+  sensitive = true
+}
+variable "redis_instance_type" {
+  default = "cache.t3.micro"
+}

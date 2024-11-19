@@ -13,9 +13,9 @@ locals {
     TFE_DATABASE_HOST = "${aws_db_instance.tfe-ec2-postgres.address}:${aws_db_instance.tfe-ec2-postgres.port}"
     TFE_OBJECT_STORAGE_S3_REGION = var.region
     TFE_OBJECT_STORAGE_S3_BUCKET = aws_s3_bucket.tfe_ec2_s3.bucket
-    TFE_REDIS_HOST = "${aws_elasticache_cluster.tfe_redis.cache_nodes[0].address}:${aws_elasticache_cluster.tfe_redis.cache_nodes[0].port}"
-    TFE_REDIS_USER = aws_elasticache_user.tfe_user.user_id
-    TFE_REDIS_PASSWORD = tolist(aws_elasticache_user.tfe_user.authentication_mode[0].passwords)[0]
+    TFE_REDIS_HOST = "${aws_elasticache_replication_group.tfe_redis_rg.primary_endpoint_address}:${aws_elasticache_replication_group.tfe_redis_rg.port}"
+    TFE_REDIS_USER = var.redis_username
+    TFE_REDIS_PASSWORD = local.redis_password
   }
   ec2_user_data = templatefile("${path.module}/templates/install_tfe.sh.tpl", local.user_data_args)
 }
@@ -92,7 +92,7 @@ resource "aws_instance" "tfe-ec2" {
     owner = var.owner
     Env   = var.env
   }
-  depends_on = [ aws_db_instance.tfe-ec2-postgres, aws_elasticache_cluster.tfe_redis, aws_s3_bucket.tfe_ec2_s3 ]
+  depends_on = [ aws_db_instance.tfe-ec2-postgres, aws_elasticache_replication_group.tfe_redis_rg, aws_s3_bucket.tfe_ec2_s3 ]
 }
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key-${random_id.id.hex}"

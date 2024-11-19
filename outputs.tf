@@ -15,7 +15,8 @@ output "rds_username" {
 }
 output "redis_endpoint" {
     description = "Redis Endpoint Address"
-    value = "${aws_elasticache_cluster.tfe_redis.cache_nodes[0].address}:${aws_elasticache_cluster.tfe_redis.cache_nodes[0].port}"
+    value = "${aws_elasticache_replication_group.tfe_redis_rg.primary_endpoint_address}:${aws_elasticache_replication_group.tfe_redis_rg.port}"
+    #value = "${aws_elasticache_cluster.tfe_redis.cache_nodes[0].address}:${aws_elasticache_cluster.tfe_redis.cache_nodes[0].port}"
 }
 output "tfe_ec2_pubicip" {
     description = "Public IP address of EC2 Instance"
