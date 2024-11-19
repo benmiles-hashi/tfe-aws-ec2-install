@@ -1,0 +1,60 @@
+---
+name: terraform-enterprise
+services:
+  tfe:
+    image: images.releases.hashicorp.com/hashicorp/terraform-enterprise:v202410-1
+    environment:
+      TFE_LICENSE: "<license>"
+      TFE_HOSTNAME: "terraform.example.com"
+      TFE_ENCRYPTION_PASSWORD: "<password>"
+      TFE_OPERATIONAL_MODE: "active-active"
+      TFE_DISK_CACHE_VOLUME_NAME: "${COMPOSE_PROJECT_NAME}_terraform-enterprise-cache"
+      TFE_TLS_CERT_FILE: "/etc/ssl/private/terraform-enterprise/cert.pem"
+      TFE_TLS_KEY_FILE: "/etc/ssl/private/terraform-enterprise/key.pem"
+      TFE_TLS_CA_BUNDLE_FILE: "/etc/ssl/private/terraform-enterprise/bundle.pem"
+      TFE_IACT_SUBNETS: "0.0.0.0/0"
+
+      # Database settings. See the configuration reference for more settings.
+      TFE_DATABASE_USER: "tfe"
+      TFE_DATABASE_PASSWORD: "<password>"
+      TFE_DATABASE_HOST: "<db_fqdn>:5432"
+      TFE_DATABASE_NAME: "tfe"
+
+      # Object storage settings. See the configuration reference for more settings.
+      TFE_OBJECT_STORAGE_TYPE: "s3"
+      TFE_OBJECT_STORAGE_S3_USE_INSTANCE_PROFILE: "true"
+      TFE_OBJECT_STORAGE_S3_REGION: "us-east-1"
+      TFE_OBJECT_STORAGE_S3_BUCKET: "tfe-ec2-bucket"
+
+      TFE_REDIS_HOST: "<redis_fqdn>:6379"
+      TFE_REDIS_USER: "tfe"
+      TFE_REDIS_PASSWORD: "<password>"
+      TFE_REDIS_USE_TLS: "false"
+      TFE_REDIS_USE_AUTH: "false"
+
+      TFE_VAULT_CLUSTER_ADDRESS: "https://<local_ip>:8201"
+
+    cap_add:
+      - IPC_LOCK
+    read_only: true
+    tmpfs:
+      - /tmp:mode=01777
+      - /run
+      - /var/log/terraform-enterprise
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8201:8201"
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /run/docker.sock
+      - type: bind
+        source: ./certs
+        target: /etc/ssl/private/terraform-enterprise
+      - type: volume
+        source: terraform-enterprise-cache
+        target: /var/cache/tfe-task-worker/terraform
+volumes:
+  terraform-enterprise-cache:
+
