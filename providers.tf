@@ -1,4 +1,10 @@
 terraform {
+  cloud {
+    organization = "ben-miles-org"
+    workspaces {
+      name = "tfe-aws-ec2-install"
+    }
+  }
   required_providers {
     aws = {
       source = "hashicorp/aws"
